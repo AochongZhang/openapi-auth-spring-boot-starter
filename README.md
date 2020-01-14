@@ -1,0 +1,1 @@
+# openapi-auth-spring-boot-starter
