@@ -2,11 +2,9 @@ package com.zhangaochong.spring.starter.openapi;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.io.IoUtil;
-import com.alibaba.fastjson.JSON;
 import com.zhangaochong.spring.starter.openapi.annotation.OpenApiAuth;
 import com.zhangaochong.spring.starter.openapi.enums.StatusEnum;
 import com.zhangaochong.spring.starter.openapi.properties.OpenApiAuthProperties;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -27,14 +25,14 @@ import java.util.function.UnaryOperator;
  * @author AochongZhang
  */
 @ControllerAdvice
-public class DecryptRequestBodyAdvice extends RequestBodyAdviceAdapter {
+public class OpenApiRequestBodyAdvice extends RequestBodyAdviceAdapter {
     /** 解密策略 */
     private final UnaryOperator<InputStream> decryptStrategy;
 
     @Resource
     private OpenApiAuthProperties openApiAuthProperties;
 
-    public DecryptRequestBodyAdvice() {
+    public OpenApiRequestBodyAdvice() {
         // 默认Base64解码
         this((i) -> {
             byte[] decode = Base64.decode(IoUtil.readBytes(i));
@@ -42,7 +40,7 @@ public class DecryptRequestBodyAdvice extends RequestBodyAdviceAdapter {
         });
     }
 
-    public DecryptRequestBodyAdvice(UnaryOperator<InputStream> decryptStrategy) {
+    public OpenApiRequestBodyAdvice(UnaryOperator<InputStream> decryptStrategy) {
         this.decryptStrategy = decryptStrategy;
     }
 
@@ -86,6 +84,6 @@ public class DecryptRequestBodyAdvice extends RequestBodyAdviceAdapter {
                                            MethodParameter methodParameter,
                                            Type type,
                                            Class<? extends HttpMessageConverter<?>> aClass) throws IOException {
-        return new DecryptHttpInputMessage(httpInputMessage, decryptStrategy);
+        return new OpenApiHttpInputMessage(httpInputMessage, decryptStrategy);
     }
 }

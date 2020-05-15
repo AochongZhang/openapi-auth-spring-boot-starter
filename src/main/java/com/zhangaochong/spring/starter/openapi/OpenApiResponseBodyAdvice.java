@@ -22,19 +22,19 @@ import java.util.function.UnaryOperator;
  * @author AochongZhang
  */
 @ControllerAdvice
-public class EncryptResponseBodyAdvice implements ResponseBodyAdvice<Object> {
+public class OpenApiResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     /** 加密策略 */
     private final UnaryOperator<Object> encryptStrategy;
 
     @Resource
     private OpenApiAuthProperties openApiAuthProperties;
 
-    public EncryptResponseBodyAdvice() {
+    public OpenApiResponseBodyAdvice() {
         // 默认Base64编码
         this(o -> Base64.encode(JSON.toJSONString(o)));
     }
 
-    public EncryptResponseBodyAdvice(UnaryOperator<Object> encryptStrategy) {
+    public OpenApiResponseBodyAdvice(UnaryOperator<Object> encryptStrategy) {
         this.encryptStrategy = encryptStrategy;
     }
 

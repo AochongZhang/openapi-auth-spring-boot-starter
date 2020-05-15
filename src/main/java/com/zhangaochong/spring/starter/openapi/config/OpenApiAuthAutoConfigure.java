@@ -1,7 +1,7 @@
 package com.zhangaochong.spring.starter.openapi.config;
 
-import com.zhangaochong.spring.starter.openapi.DecryptRequestBodyAdvice;
-import com.zhangaochong.spring.starter.openapi.EncryptResponseBodyAdvice;
+import com.zhangaochong.spring.starter.openapi.OpenApiRequestBodyAdvice;
+import com.zhangaochong.spring.starter.openapi.OpenApiResponseBodyAdvice;
 import com.zhangaochong.spring.starter.openapi.properties.OpenApiAuthProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -17,14 +17,14 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties(OpenApiAuthProperties.class)
 public class OpenApiAuthAutoConfigure {
     @Bean
-    @ConditionalOnMissingBean(EncryptResponseBodyAdvice.class)
-    public EncryptResponseBodyAdvice encryptResponseBodyAdvice() {
-        return new EncryptResponseBodyAdvice();
+    @ConditionalOnMissingBean(OpenApiRequestBodyAdvice.class)
+    public OpenApiRequestBodyAdvice openApiRequestBodyAdvice() {
+        return new OpenApiRequestBodyAdvice();
     }
 
     @Bean
-    @ConditionalOnMissingBean(DecryptRequestBodyAdvice.class)
-    public DecryptRequestBodyAdvice decryptRequestBodyAdvice() {
-        return new DecryptRequestBodyAdvice();
+    @ConditionalOnMissingBean(OpenApiResponseBodyAdvice.class)
+    public OpenApiResponseBodyAdvice openApiResponseBodyAdvice() {
+        return new OpenApiResponseBodyAdvice();
     }
 }

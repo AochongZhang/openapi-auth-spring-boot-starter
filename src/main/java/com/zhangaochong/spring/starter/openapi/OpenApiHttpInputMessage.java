@@ -7,11 +7,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.UnaryOperator;
 
-public class DecryptHttpInputMessage implements HttpInputMessage {
+public class OpenApiHttpInputMessage implements HttpInputMessage {
     private HttpHeaders httpHeaders;
     private InputStream body;
 
-    public DecryptHttpInputMessage(HttpInputMessage httpInputMessage,
+    public OpenApiHttpInputMessage(HttpInputMessage httpInputMessage,
                                    UnaryOperator<InputStream> decryptStrategy) throws IOException {
         this.httpHeaders = httpInputMessage.getHeaders();
         this.body = decryptStrategy.apply(httpInputMessage.getBody());
