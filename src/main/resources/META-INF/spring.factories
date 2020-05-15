@@ -1,0 +1,2 @@
+#org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+#com.zhangaochong.spring.starter.openapi.config.OpenApiAuthAutoConfigure
