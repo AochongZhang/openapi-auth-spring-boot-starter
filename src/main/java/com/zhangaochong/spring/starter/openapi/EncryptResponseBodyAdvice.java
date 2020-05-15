@@ -31,7 +31,7 @@ public class EncryptResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
     public EncryptResponseBodyAdvice() {
         // 默认Base64编码
-        encryptStrategy = (o -> Base64.encode(JSON.toJSONString(o)));
+        this(o -> Base64.encode(JSON.toJSONString(o)));
     }
 
     public EncryptResponseBodyAdvice(UnaryOperator<Object> encryptStrategy) {
@@ -39,13 +39,13 @@ public class EncryptResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     }
 
     @Override
-    public boolean supports(MethodParameter returnType, Class converterType) {
+    public boolean supports(MethodParameter methodParameter, Class converterType) {
         StatusEnum responseEncrypt = openApiAuthProperties.getResponseEncrypt();
         if (StatusEnum.ENABLE.equals(responseEncrypt)) {
-            OpenApiAuth openApiAuth = Objects.requireNonNull(returnType.getMethod())
+            OpenApiAuth openApiAuth = Objects.requireNonNull(methodParameter.getMethod())
                     .getAnnotation(OpenApiAuth.class);
             if (openApiAuth == null) {
-                openApiAuth = returnType.getContainingClass()
+                openApiAuth = methodParameter.getContainingClass()
                         .getAnnotation(OpenApiAuth.class);
             }
             if (openApiAuth != null) {

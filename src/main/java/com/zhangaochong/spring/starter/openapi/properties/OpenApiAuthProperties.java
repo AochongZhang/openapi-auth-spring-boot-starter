@@ -12,6 +12,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties(prefix = "openapi-auth")
 public class OpenApiAuthProperties {
+    /** 请求参数是否解密 */
+    private StatusEnum requestDecrypt;
     /** 返回值是否加密 */
     private StatusEnum responseEncrypt;
 }

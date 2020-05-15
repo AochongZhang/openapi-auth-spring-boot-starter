@@ -11,5 +11,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface OpenApiAuth {
+    boolean requestDecrypt() default true;
     boolean responseEncrypt() default true;
 }
