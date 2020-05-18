@@ -1,10 +1,10 @@
 package com.zhangaochong.spring.starter.openapi;
 
-import cn.hutool.core.codec.Base64;
-import com.alibaba.fastjson.JSON;
 import com.zhangaochong.spring.starter.openapi.annotation.OpenApiAuth;
 import com.zhangaochong.spring.starter.openapi.enums.StatusEnum;
+import com.zhangaochong.spring.starter.openapi.handler.EncryptHandler;
 import com.zhangaochong.spring.starter.openapi.properties.OpenApiAuthProperties;
+import com.zhangaochong.spring.starter.openapi.util.OpenApiAuthUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import javax.annotation.Resource;
-import java.util.Objects;
-import java.util.function.UnaryOperator;
 
 /**
  * 返回值加密处理
@@ -23,31 +21,17 @@ import java.util.function.UnaryOperator;
  */
 @ControllerAdvice
 public class OpenApiResponseBodyAdvice implements ResponseBodyAdvice<Object> {
-    /** 加密策略 */
-    private final UnaryOperator<Object> encryptStrategy;
-
     @Resource
     private OpenApiAuthProperties openApiAuthProperties;
 
-    public OpenApiResponseBodyAdvice() {
-        // 默认Base64编码
-        this(o -> Base64.encode(JSON.toJSONString(o)));
-    }
-
-    public OpenApiResponseBodyAdvice(UnaryOperator<Object> encryptStrategy) {
-        this.encryptStrategy = encryptStrategy;
-    }
+    @Resource
+    private EncryptHandler encryptHandler;
 
     @Override
     public boolean supports(MethodParameter methodParameter, Class converterType) {
         StatusEnum responseEncrypt = openApiAuthProperties.getResponseEncrypt();
         if (StatusEnum.ENABLE.equals(responseEncrypt)) {
-            OpenApiAuth openApiAuth = Objects.requireNonNull(methodParameter.getMethod())
-                    .getAnnotation(OpenApiAuth.class);
-            if (openApiAuth == null) {
-                openApiAuth = methodParameter.getContainingClass()
-                        .getAnnotation(OpenApiAuth.class);
-            }
+            OpenApiAuth openApiAuth = OpenApiAuthUtils.getAnnotation(methodParameter);
             if (openApiAuth != null) {
                 return openApiAuth.responseEncrypt();
             }
@@ -62,6 +46,6 @@ public class OpenApiResponseBodyAdvice implements ResponseBodyAdvice<Object> {
                                   Class selectedConverterType,
                                   ServerHttpRequest request,
                                   ServerHttpResponse response) {
-        return encryptStrategy.apply(body);
+        return encryptHandler.encrypt(body);
     }
 }

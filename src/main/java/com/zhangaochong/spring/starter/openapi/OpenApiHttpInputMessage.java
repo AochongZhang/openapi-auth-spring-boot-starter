@@ -3,18 +3,18 @@ package com.zhangaochong.spring.starter.openapi;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.function.UnaryOperator;
 
+/**
+ * @author AochongZhang
+ */
 public class OpenApiHttpInputMessage implements HttpInputMessage {
-    private HttpHeaders httpHeaders;
-    private InputStream body;
+    private final HttpHeaders httpHeaders;
+    private final InputStream body;
 
-    public OpenApiHttpInputMessage(HttpInputMessage httpInputMessage,
-                                   UnaryOperator<InputStream> decryptStrategy) throws IOException {
+    public OpenApiHttpInputMessage(HttpInputMessage httpInputMessage, InputStream inputStream) {
         this.httpHeaders = httpInputMessage.getHeaders();
-        this.body = decryptStrategy.apply(httpInputMessage.getBody());
+        this.body = inputStream;
     }
 
     @Override

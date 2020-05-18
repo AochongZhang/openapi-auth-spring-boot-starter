@@ -1,10 +1,14 @@
 package com.zhangaochong.spring.starter.openapi;
 
-import cn.hutool.core.codec.Base64;
 import cn.hutool.core.io.IoUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.zhangaochong.spring.starter.openapi.annotation.OpenApiAuth;
 import com.zhangaochong.spring.starter.openapi.enums.StatusEnum;
+import com.zhangaochong.spring.starter.openapi.handler.AuthHandler;
+import com.zhangaochong.spring.starter.openapi.handler.DecryptHandler;
 import com.zhangaochong.spring.starter.openapi.properties.OpenApiAuthProperties;
+import com.zhangaochong.spring.starter.openapi.util.OpenApiAuthUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -15,8 +19,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.util.Objects;
-import java.util.function.UnaryOperator;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 请求参数解密处理
@@ -26,23 +29,14 @@ import java.util.function.UnaryOperator;
  */
 @ControllerAdvice
 public class OpenApiRequestBodyAdvice extends RequestBodyAdviceAdapter {
-    /** 解密策略 */
-    private final UnaryOperator<InputStream> decryptStrategy;
-
     @Resource
     private OpenApiAuthProperties openApiAuthProperties;
 
-    public OpenApiRequestBodyAdvice() {
-        // 默认Base64解码
-        this((i) -> {
-            byte[] decode = Base64.decode(IoUtil.readBytes(i));
-            return IoUtil.toStream(decode);
-        });
-    }
+    @Resource
+    private AuthHandler authHandler;
 
-    public OpenApiRequestBodyAdvice(UnaryOperator<InputStream> decryptStrategy) {
-        this.decryptStrategy = decryptStrategy;
-    }
+    @Resource
+    private DecryptHandler decryptHandler;
 
     /**
      * @param methodParameter
@@ -54,19 +48,7 @@ public class OpenApiRequestBodyAdvice extends RequestBodyAdviceAdapter {
     public boolean supports(MethodParameter methodParameter,
                             Type type,
                             Class<? extends HttpMessageConverter<?>> aClass) {
-        StatusEnum requestDecrypt = openApiAuthProperties.getRequestDecrypt();
-        if (StatusEnum.ENABLE.equals(requestDecrypt)) {
-            OpenApiAuth openApiAuth = Objects.requireNonNull(methodParameter.getMethod())
-                    .getAnnotation(OpenApiAuth.class);
-            if (openApiAuth == null) {
-                openApiAuth = methodParameter.getContainingClass()
-                        .getAnnotation(OpenApiAuth.class);
-            }
-            if (openApiAuth != null) {
-                return openApiAuth.requestDecrypt();
-            }
-        }
-        return false;
+        return true;
     }
 
     /**
@@ -84,6 +66,47 @@ public class OpenApiRequestBodyAdvice extends RequestBodyAdviceAdapter {
                                            MethodParameter methodParameter,
                                            Type type,
                                            Class<? extends HttpMessageConverter<?>> aClass) throws IOException {
-        return new OpenApiHttpInputMessage(httpInputMessage, decryptStrategy);
+
+        httpInputMessage = requestDecrypt(httpInputMessage, methodParameter);
+        httpInputMessage = requestAuth(httpInputMessage, methodParameter);
+        return httpInputMessage;
+    }
+
+    private HttpInputMessage requestDecrypt(HttpInputMessage httpInputMessage, MethodParameter methodParameter) throws IOException {
+        StatusEnum requestDecrypt = openApiAuthProperties.getRequestDecrypt();
+        if (StatusEnum.ENABLE.equals(requestDecrypt)) {
+            OpenApiAuth openApiAuth = OpenApiAuthUtils.getAnnotation(methodParameter);
+            if (openApiAuth != null) {
+                if (openApiAuth.requestDecrypt()) {
+                    return new OpenApiHttpInputMessage(httpInputMessage, decryptHandler.decrypt(httpInputMessage.getBody()));
+                }
+            }
+        }
+        return httpInputMessage;
+    }
+
+    private HttpInputMessage requestAuth(HttpInputMessage httpInputMessage, MethodParameter methodParameter) throws IOException {
+        StatusEnum requestAuth = openApiAuthProperties.getRequestAuth();
+        if (StatusEnum.ENABLE.equals(requestAuth)) {
+            OpenApiAuth openApiAuth = OpenApiAuthUtils.getAnnotation(methodParameter);
+            if (openApiAuth != null) {
+                if (openApiAuth.requestAuth()) {
+                    InputStream body = httpInputMessage.getBody();
+                    String read = IoUtil.read(body, StandardCharsets.UTF_8);
+                    JSONObject jsonObject = JSON.parseObject(read);
+
+                    authHandler.auth(jsonObject.getInnerMap(), openApiAuthProperties.getTimeUnit(),
+                            openApiAuthProperties.getTimeout());
+
+                    jsonObject.remove(AuthHandler.ACCESSKEY_PARAM_NAME);
+                    jsonObject.remove(AuthHandler.TIMESTAMP_PARAM_NAME);
+                    jsonObject.remove(AuthHandler.NONCE_PARAM_NAME);
+                    jsonObject.remove(AuthHandler.SIGN_PARAM_NAME);
+                    return new OpenApiHttpInputMessage(httpInputMessage,
+                            IoUtil.toStream(jsonObject.toJSONString(), StandardCharsets.UTF_8));
+                }
+            }
+        }
+        return httpInputMessage;
     }
 }
