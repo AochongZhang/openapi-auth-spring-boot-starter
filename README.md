@@ -18,7 +18,7 @@
 + **请求参数解密**: 该功能默认关闭, 开启后用户请求时需要对请求参数进行加密
 + **响应加密数据**: 该功能默认关闭, 开启后用户收到响应时需要进行解密
 
-**重要**: 所有功能只对使用@**RequestBody**方式接受参数的接口生效
+**重要**: 所有功能只对使用@**RequestBody**方式接收参数的接口生效
 
 ## 安装
 引入Maven依赖
@@ -114,6 +114,24 @@ openapi-auth:
 public DecryptHandler decryptHandler() {
     return is -> {
         return 解密方法(is);
+    };
+}
+```
+
+### 开启响应数据加密
+默认响应数据加密关闭，通过修改配置文件开启
+1. 修改配置文件
+```yaml
+openapi-auth:
+  response-encrypt: enable
+```
+1. 默认只进行Base64编码，用过实现**EncryptHandler**类的**encrypt**方法配置自定义加密方法
+2. 配置该类对象为EncryptHandler的Bean
+```java
+@Bean
+public EncryptHandler encryptHandler() {
+    return o -> {
+        return 解密方法(o);
     };
 }
 ```
