@@ -1,11 +1,11 @@
 package com.zhangaochong.spring.starter.openapi.handler;
 
-import cn.hutool.core.codec.Base64;
 import com.alibaba.fastjson.JSON;
+import org.springframework.util.Base64Utils;
 
 public class Base64EncryptHandler implements EncryptHandler {
     @Override
     public Object encrypt(Object o) {
-        return Base64.encode(JSON.toJSONString(o));
+        return Base64Utils.encodeToString(JSON.toJSONString(o).getBytes());
     }
 }

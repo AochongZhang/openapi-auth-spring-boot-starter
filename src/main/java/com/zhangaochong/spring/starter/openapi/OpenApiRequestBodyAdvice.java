@@ -1,6 +1,5 @@
 package com.zhangaochong.spring.starter.openapi;
 
-import cn.hutool.core.io.IoUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zhangaochong.spring.starter.openapi.annotation.OpenApiAuth;
@@ -9,6 +8,7 @@ import com.zhangaochong.spring.starter.openapi.handler.AuthHandler;
 import com.zhangaochong.spring.starter.openapi.handler.DecryptHandler;
 import com.zhangaochong.spring.starter.openapi.properties.OpenApiAuthProperties;
 import com.zhangaochong.spring.starter.openapi.util.OpenApiAuthUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -92,7 +92,7 @@ public class OpenApiRequestBodyAdvice extends RequestBodyAdviceAdapter {
             if (openApiAuth != null) {
                 if (openApiAuth.requestAuth()) {
                     InputStream body = httpInputMessage.getBody();
-                    String read = IoUtil.read(body, StandardCharsets.UTF_8);
+                    String read = IOUtils.toString(body, StandardCharsets.UTF_8);
                     JSONObject jsonObject = JSON.parseObject(read);
 
                     authHandler.auth(jsonObject.getInnerMap(), openApiAuthProperties.getTimeUnit(),
@@ -103,7 +103,7 @@ public class OpenApiRequestBodyAdvice extends RequestBodyAdviceAdapter {
                     jsonObject.remove(AuthHandler.NONCE_PARAM_NAME);
                     jsonObject.remove(AuthHandler.SIGN_PARAM_NAME);
                     return new OpenApiHttpInputMessage(httpInputMessage,
-                            IoUtil.toStream(jsonObject.toJSONString(), StandardCharsets.UTF_8));
+                            IOUtils.toInputStream(jsonObject.toJSONString(), StandardCharsets.UTF_8));
                 }
             }
         }

@@ -1,14 +1,21 @@
 package com.zhangaochong.spring.starter.openapi.handler;
 
-import cn.hutool.core.codec.Base64;
-import cn.hutool.core.io.IoUtil;
+import org.apache.commons.io.IOUtils;
+import org.springframework.util.Base64Utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 public class Base64DecryptHandler implements DecryptHandler {
     @Override
     public InputStream decrypt(InputStream is) {
-        byte[] decode = Base64.decode(IoUtil.readBytes(is));
-        return IoUtil.toStream(decode);
+        try {
+            byte[] bytes = IOUtils.toByteArray(is);
+            byte[] decode = Base64Utils.decode(bytes);
+            return new ByteArrayInputStream(decode);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

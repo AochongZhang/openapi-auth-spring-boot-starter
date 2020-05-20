@@ -1,7 +1,7 @@
 package com.zhangaochong.spring.starter.openapi.handler;
 
-import cn.hutool.core.lang.Assert;
-import cn.hutool.crypto.SecureUtil;
+import org.springframework.util.Assert;
+import org.springframework.util.DigestUtils;
 
 import java.util.Map;
 import java.util.SortedMap;
@@ -22,7 +22,7 @@ public abstract class AbstractAuthHandler implements AuthHandler {
             stringBuilder.append(key).append("=").append(params.get(key)).append("&");
         }
         stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-        return SecureUtil.md5(stringBuilder.toString());
+        return DigestUtils.md5DigestAsHex(stringBuilder.toString().getBytes());
     }
 
     @Override
@@ -34,13 +34,13 @@ public abstract class AbstractAuthHandler implements AuthHandler {
 
         // 验证必需参数
         String temp = "{}不能为空";
-        Assert.notBlank(accessKey, temp, ACCESSKEY_PARAM_NAME);
-        Assert.notNull(timestamp, temp, TIMESTAMP_PARAM_NAME);
-        Assert.notBlank(nonce, temp, NONCE_PARAM_NAME);
-        Assert.notBlank(sign, temp, SIGN_PARAM_NAME);
+        Assert.hasText(accessKey, String.format(temp, ACCESSKEY_PARAM_NAME));
+        Assert.notNull(timestamp, String.format(temp, TIMESTAMP_PARAM_NAME));
+        Assert.hasText(nonce, String.format(temp, NONCE_PARAM_NAME));
+        Assert.hasText(sign, String.format(temp, SIGN_PARAM_NAME));
 
         String secretKey = getUserSecretKey(accessKey);
-        Assert.notBlank(secretKey, temp, SECRETKEY_PARAM_NAME);
+        Assert.hasText(secretKey, String.format(temp, SECRETKEY_PARAM_NAME));
 
         // 验证时间
         validTime(timestamp, timeUnit, timeout);
