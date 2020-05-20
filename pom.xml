@@ -9,7 +9,7 @@
     <version>1.0.1</version>
     <name>openapi-auth-spring-boot-starter</name>
     <url>https://github.com/AochongZhang/openapi-auth-spring-boot-starter</url>
-    <description>用于开放式接口的请求验证和加密解密</description>
+    <description>用于开放式接口的请求认证和加密解密</description>
 
     <licenses>
         <license>
@@ -74,7 +74,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <version>${spring.boot.version}</version>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
