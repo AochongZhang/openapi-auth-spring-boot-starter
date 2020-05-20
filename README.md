@@ -107,7 +107,7 @@ public AuthHandler authHandler() {
 openapi-auth:
   request-decrypt: enable
 ```
-2. 默认只进行Base64解码，用过实现**DecryptHandler**类的**decrypt**方法配置自定义解密方法
+2. 默认只进行Base64解码，通过实现**DecryptHandler**类的**decrypt**方法配置自定义解密方法
 3. 配置该类对象为DecryptHandler的Bean
 ```java
 @Bean
@@ -125,7 +125,7 @@ public DecryptHandler decryptHandler() {
 openapi-auth:
   response-encrypt: enable
 ```
-1. 默认只进行Base64编码，用过实现**EncryptHandler**类的**encrypt**方法配置自定义加密方法
+1. 默认只进行Base64编码，通过实现**EncryptHandler**类的**encrypt**方法配置自定义加密方法
 2. 配置该类对象为EncryptHandler的Bean
 ```java
 @Bean
