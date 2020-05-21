@@ -27,15 +27,14 @@ public abstract class AbstractAuthHandler implements AuthHandler {
 
     @Override
     public void auth(Map<String, Object> params, TimeUnit timeUnit, long timeout) {
-        String accessKey = (String) params.get(ACCESSKEY_PARAM_NAME);
-        Long timestamp = (Long) params.get(TIMESTAMP_PARAM_NAME);
-        String nonce = (String) params.get(NONCE_PARAM_NAME);
-        String sign = (String) params.remove(SIGN_PARAM_NAME);
+        String accessKey = String.valueOf(params.get(ACCESSKEY_PARAM_NAME));
+        long timestamp = Long.parseLong(String.valueOf(params.get(TIMESTAMP_PARAM_NAME)));
+        String nonce = String.valueOf(params.get(NONCE_PARAM_NAME));
+        String sign = String.valueOf(params.remove(SIGN_PARAM_NAME));
 
         // 验证必需参数
         String temp = "{}不能为空";
         Assert.hasText(accessKey, String.format(temp, ACCESSKEY_PARAM_NAME));
-        Assert.notNull(timestamp, String.format(temp, TIMESTAMP_PARAM_NAME));
         Assert.hasText(nonce, String.format(temp, NONCE_PARAM_NAME));
         Assert.hasText(sign, String.format(temp, SIGN_PARAM_NAME));
 
